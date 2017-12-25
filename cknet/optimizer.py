@@ -1,10 +1,9 @@
-
 class Optimizer():
 
     def __init__(self, name=None):
-        super(Optimizer, self).__init__(name=name)
+        self.name = name
 
-    def optimizer(self, layer_list, epoch):
+    def optimizer(self, parameters, grads, epoch):
         raise NotImplementedError
 
 class GradientDescent(Optimizer):
@@ -13,8 +12,16 @@ class GradientDescent(Optimizer):
         super(GradientDescent, self).__init__(name)
         self.learning_rate = learning_rate
 
-    def optimizer(self, layer_list, epoch):
-        raise NotImplementedError
+    def optimizer(self, parameters, grads, epoch):
+        L = len(parameters) // 2
+        for i in range(1, L + 1):
+            W = parameters["W" + str(i)]
+            b = parameters["b" + str(i)]
+            dW = grads["dW" + str(i)]
+            db = grads["db" + str(i)]
+            parameters["W" + str(i)] = W - self.learning_rate * dW
+            parameters["b" + str(i)] = b - self.learning_rate * db
+        return parameters
 
 class RMSProp(Optimizer):
     def __init__(self, decay_rate=0.5, learning_rate=2e-3, epsilon=1e-6, name="rmsProp"):
@@ -23,5 +30,5 @@ class RMSProp(Optimizer):
         self.learning_rate = learning_rate
         self.epsilon = epsilon
 
-    def optimizer(self, layer_list, epoch):
+    def optimizer(self, parameters, grads, epoch):
         raise NotImplementedError

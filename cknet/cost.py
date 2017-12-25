@@ -2,25 +2,26 @@ import numpy as np
 
 class Cost():
 
-    def __call__(self, prediction, target):
+    def __call__(self, AL, Y):
         raise NotImplementedError
 
-    def bprop(self, prediction, target):
+    def bprop(self, AL, Y):
         raise NotImplementedError
 
 class CrossEntropy(Cost):
-    def __init__(self, epsilon=1e-11):
-        self.epsilon = epsilon
 
-    def __call__(self, prediction, target):
-        clipped = np.clip(prediction, self.epsilon, 1 - self.epsilon)
-        cost = target * np.log(clipped) + (1 - target) * np.log(1 - clipped)
-        return -cost
+    def __call__(self, AL, Y):
+        m = Y.shape[1]
+        cost = -(np.dot(Y, np.log(AL).T) + np.dot(1 - Y, np.log(1 - AL).T)) / m
 
-    def bprop(self, prediction, target):
-        denominator = np.maximum(prediction - prediction ** 2, self.epsilon)
-        delta = (prediction - target) / denominator
-        return delta
+        cost = np.squeeze(cost)  # To make sure your cost's shape is what we expect (e.g. this turns [[17]] into 17).
+        assert (cost.shape == ())
+        return cost
+
+    def bprop(self, AL, Y):
+        dAL = - (np.divide(Y, AL) - np.divide(1-Y, 1-AL))
+        assert (dAL.shape == AL.shape)
+        return dAL
 
 class SquaredError(Cost):
 
