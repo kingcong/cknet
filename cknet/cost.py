@@ -8,7 +8,7 @@ class Cost():
     def bprop(self, AL, Y):
         raise NotImplementedError
 
-class CrossEntropy(Cost):
+class BinaryCrossEntropy(Cost):
 
     def __call__(self, AL, Y):
         m = Y.shape[1]
@@ -23,10 +23,28 @@ class CrossEntropy(Cost):
         assert (dAL.shape == AL.shape)
         return dAL
 
+class CrossEntropy(Cost):
+
+    def __call__(self, AL, Y):
+        m = Y.shape[1]
+        # log_likelihood = -np.multiply(Y, np.log(AL))
+        #
+        # loss = np.sum(log_likelihood) / m
+
+        sum = -np.sum(Y * np.log(AL)) / m
+
+        return sum
+
+    def bprop(self, AL, Y):
+
+        return AL - Y
+
+
 class SquaredError(Cost):
 
     def __call__(self, prediction, target):
-        return (prediction - target) ** 2 / 2
+        res = (prediction - target) ** 2 / 2
+        return np.sum(res)
 
-    def delta(self, prediction, target):
-        return prediction - target
+    def bprop(self, AL, Y):
+        return AL - Y
