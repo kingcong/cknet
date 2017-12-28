@@ -12,6 +12,7 @@ class Model():
         self.total_cost = []
         self.initializer = initializer()
         self.weights = None
+        self.class_number = 0
 
     def init_parameters(self):
         layer1 = self.layers[0]
@@ -27,6 +28,8 @@ class Model():
 
         np.random.seed(1)
         self.weights = self.init_parameters()
+        lastlayer = self.layers[len(self.layers)-1]
+        self.class_number = lastlayer.size
 
         for i in range(0, num_epochs):
             self.weights = self.epoch_fit(X, Y, self.weights, i)
@@ -55,7 +58,7 @@ class Model():
                                    parameters["b" + str(l)])
             caches.append(cache)
 
-        assert (A.shape == (1, X.shape[1]))
+        assert (A.shape == (layer.size, X.shape[1]))
         return A, caches
 
     def bprop(self, AL, Y, caches):
@@ -76,25 +79,34 @@ class Model():
             grads["db"+str(l+1)] = db_temp
         return grads
 
-    def predict(self, X, Y):
-        m = X.shape[1]
-        n = len(self.weights) // 2
-        p = np.zeros((1, m))
+    def predict(self, X):
 
-        probas, caches = self.fprop(X, self.weights)
+        probas = self._get_result(X)
 
-        # convert probas to 0/1 predictions
-        for i in range(0, probas.shape[1]):
-            if probas[0, i] > 0.5:
-                p[0, i] = 1
-            else:
-                p[0, i] = 0
+        if self.class_number == 1:
+            return probas > 0.5
+        else:
+            return np.argmax(probas, axis=0)
 
-        return p
 
     def eval(self, X, Y):
         m = X.shape[1]
-        p = self.predict(X, Y)
+        p = self.predict(X)
 
-        accuracy = np.sum((p == Y)/m)
-        return accuracy
+        if self.class_number == 1:
+            accuracy = np.sum((p == Y) / m)
+            return accuracy
+        else:
+            indices_Y = np.argmax(Y, axis=0)
+            accuracy = np.sum((p == indices_Y) / m)
+            return accuracy
+
+
+
+    def _get_result(self, X):
+        m = X.shape[1]
+        p = np.zeros((self.class_number, m))
+
+        probas, _ = self.fprop(X, self.weights)
+
+        return probas
