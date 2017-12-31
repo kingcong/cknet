@@ -4,7 +4,7 @@ from cknet.model import Model
 from cknet.activation import Relu,Softmax
 from cknet.cost import *
 from cknet.optimizer import GradientDescent
-from cknet.initializers import RandomInit
+from cknet.initializers import *
 
 # Loading the dataset
 X_train_orig, Y_train_orig, X_test_orig, Y_test_orig, classes = load_dataset()
@@ -33,13 +33,13 @@ layers = [
     LinearLayer(size=6, activation=Softmax)
 ]
 
-mlp = Model(layers=layers, initializer=RandomInit)
+mlp = Model(layers=layers, initializer=XavierInit)
 
 cost = CrossEntropy()
 
-optimizer = GradientDescent(learning_rate=0.0001)
+optimizer = GradientDescent(learning_rate=0.001)
 
-mlp.fit(X=X_train, Y=Y_train, cost=cost, optimizer=optimizer,num_epochs=3000)
+mlp.fit(X=X_train, Y=Y_train, cost=cost, optimizer=optimizer,num_epochs=5000)
 
 train_accuracy = mlp.eval(X = X_train, Y = Y_train)
 print("train accuracy = " + str(train_accuracy))

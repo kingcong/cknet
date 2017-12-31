@@ -1,10 +1,10 @@
 from cknet.layer import LinearLayer
 from cknet.model import Model
 from cknet.activation import Relu,Sigmoid
-from cknet.cost import BinaryCrossEntropy
+from cknet.cost import *
 from cknet.optimizer import GradientDescent
 from cknet.dataset import load_data
-from cknet.initializers import RandomInit
+from cknet.initializers import *
 import matplotlib.pyplot as plt
 
 train_x_orig, train_y, test_x_orig, test_y, classes = load_data()
@@ -27,13 +27,13 @@ layers = [
     LinearLayer(size=1, activation=Sigmoid)
 ]
 
-mlp = Model(layers=layers, initializer=RandomInit)
+mlp = Model(layers=layers, initializer=XavierInit)
 
 cost = BinaryCrossEntropy()
 
 optimizer = GradientDescent(learning_rate=0.01)
 
-mlp.fit(X=train_x, Y=train_y, cost=cost, optimizer=optimizer,num_epochs=1000)
+mlp.fit(X=train_x, Y=train_y, cost=cost, optimizer=optimizer,num_epochs=3000)
 
 train_accuracy = mlp.eval(X = train_x, Y = train_y)
 print("train accuracy = " + str(train_accuracy))

@@ -6,6 +6,12 @@ class Layer():
         super(Layer, self).__init__(name)
         self.name = name
 
+    def fprop(self, A_prev, W, b):
+        raise NotImplementedError
+
+    def bprop(self, dA, cache):
+        raise NotImplementedError
+
 
 class LinearLayer(Layer):
 
@@ -52,3 +58,11 @@ class LinearLayer(Layer):
         assert (db.shape == b.shape)
 
         return dA_prev, dW, db
+
+class Dropout(Layer):
+
+    def fprop(self, A_prev, W, b):
+        raise NotImplementedError
+
+    def bprop(self, dA, cache):
+        raise NotImplementedError

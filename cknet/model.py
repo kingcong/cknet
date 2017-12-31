@@ -1,4 +1,5 @@
 import numpy as np
+from cknet.regularization import L2Regularization
 
 class Model():
 
@@ -13,6 +14,7 @@ class Model():
         self.initializer = initializer()
         self.weights = None
         self.class_number = 0
+        self.regularization = L2Regularization(lambd=0.01)
 
     def init_parameters(self):
         layer1 = self.layers[0]
@@ -38,6 +40,8 @@ class Model():
     def epoch_fit(self, X, Y, weights, epoch):
         AL, caches = self.fprop(X, weights)
         cost = self.cost(AL, Y)
+        # Regularization
+        cost += self.regularization.cost_regularization(weights)
         grads = self.bprop(AL, Y, caches)
         weights = self.optimizer.optimizer(weights, grads, epoch)
         self.total_cost.append(cost)
@@ -64,7 +68,7 @@ class Model():
     def bprop(self, AL, Y, caches):
         grads = {}
         L = len(caches)
-        m = AL.shape[1]
+        # m = AL.shape[1]
         Y = Y.reshape(AL.shape)
 
         dAL = self.cost.bprop(AL, Y)
@@ -74,6 +78,11 @@ class Model():
             current_cache = caches[l]
             layer = self.layers[l]
             dA_prev_temp, dW_temp, db_temp = layer.bprop(grads["dA"+str(l+2)], current_cache)
+
+            # L2 Regularization
+            _, W, _ = current_cache[0]
+            dW_temp += self.regularization.brop_regularization(W, L)
+
             grads["dA"+str(l+1)] = dA_prev_temp
             grads["dW"+str(l+1)] = dW_temp
             grads["db"+str(l+1)] = db_temp
