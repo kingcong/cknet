@@ -1,4 +1,4 @@
-from cknet.layer import LinearLayer
+from cknet.layer import *
 from cknet.model import Model
 from cknet.activation import Relu,Sigmoid
 from cknet.cost import *
@@ -21,9 +21,9 @@ print ("train_x's shape: " + str(train_x.shape))
 print ("test_x's shape: " + str(test_x.shape))
 
 layers = [
-    LinearLayer(size=20, activation=Relu, input_dims=12288),
-    LinearLayer(size=7, activation=Relu),
-    LinearLayer(size=5, activation=Relu),
+    Dropout(size=20, activation=Relu, input_dims=12288, keep_prob=0.9),
+    Dropout(size=7, activation=Relu, keep_prob=0.9),
+    Dropout(size=5, activation=Relu, keep_prob=0.9),
     LinearLayer(size=1, activation=Sigmoid)
 ]
 
