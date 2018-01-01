@@ -1,4 +1,4 @@
-from cknet.layer import *
+from cknet.layer import LinearLayer
 from cknet.model import Model
 from cknet.activation import Relu,Sigmoid
 from cknet.cost import *
@@ -21,9 +21,9 @@ print ("train_x's shape: " + str(train_x.shape))
 print ("test_x's shape: " + str(test_x.shape))
 
 layers = [
-    Dropout(size=20, activation=Relu, input_dims=12288, keep_prob=0.9),
-    Dropout(size=7, activation=Relu, keep_prob=0.9),
-    Dropout(size=5, activation=Relu, keep_prob=0.9),
+    LinearLayer(size=20, activation=Relu, input_dims=12288),
+    LinearLayer(size=7, activation=Relu),
+    LinearLayer(size=5, activation=Relu),
     LinearLayer(size=1, activation=Sigmoid)
 ]
 
@@ -33,7 +33,7 @@ cost = BinaryCrossEntropy()
 
 optimizer = GradientDescent(learning_rate=0.01)
 
-mlp.fit(X=train_x, Y=train_y, cost=cost, optimizer=optimizer,num_epochs=3000)
+mlp.fit(X=train_x, Y=train_y, cost=cost, optimizer=optimizer,num_epochs=1500)
 
 train_accuracy = mlp.eval(X = train_x, Y = train_y)
 print("train accuracy = " + str(train_accuracy))
