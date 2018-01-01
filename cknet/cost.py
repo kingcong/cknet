@@ -42,8 +42,8 @@ class CrossEntropy(Cost):
 
 class SquaredError(Cost):
 
-    def __call__(self, prediction, target):
-        res = (prediction - target) ** 2 / 2
+    def __call__(self, AL, Y):
+        res = (AL - Y) ** 2 / 2
         return np.sum(res)
 
     def bprop(self, AL, Y):

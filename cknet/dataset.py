@@ -36,4 +36,4 @@ def load_data():
 
 X = np.array([[1, 4, 3], [2, 1, 6]])
 
-print(np.argmax(X, axis=0))
+# print(np.argmax(X, axis=0))
