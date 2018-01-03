@@ -41,5 +41,10 @@ print("train accuracy = " + str(train_accuracy))
 test_accuracy = mlp.eval(X = test_x, Y = test_y)
 print("test accuracy = " + str(test_accuracy))
 
+costs = []
+for i in len(mlp.total_cost):
+    if i % 100 == 0:
+        costs.append(mlp.total_cost[i])
+
 plt.plot(mlp.total_cost)
 plt.show()

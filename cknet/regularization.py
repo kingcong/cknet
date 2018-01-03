@@ -8,7 +8,7 @@ import numpy as np
 
 class Regularization():
 
-    def __init__(self, lambd = 0.01):
+    def __init__(self, lambd = 0.02):
         self.lambd = lambd
 
     def cost_regularization(self, parameters):

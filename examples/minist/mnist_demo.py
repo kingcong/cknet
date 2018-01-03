@@ -5,6 +5,7 @@ from cknet.activation import Relu,Softmax
 from cknet.cost import *
 from cknet.optimizer import GradientDescent
 from cknet.initializers import *
+import matplotlib.pyplot as plt
 
 # Loading the dataset
 X_train_orig, Y_train_orig, X_test_orig, Y_test_orig, classes = load_dataset()
@@ -39,10 +40,18 @@ cost = CrossEntropy()
 
 optimizer = GradientDescent(learning_rate=0.001)
 
-mlp.fit(X=X_train, Y=Y_train, cost=cost, optimizer=optimizer,num_epochs=5000)
+mlp.fit(X=X_train, Y=Y_train, cost=cost, optimizer=optimizer,num_epochs=1500)
 
 train_accuracy = mlp.eval(X = X_train, Y = Y_train)
 print("train accuracy = " + str(train_accuracy))
 
 test_accuracy = mlp.eval(X = X_test, Y = Y_test)
 print("test accuracy = " + str(test_accuracy))
+
+costs = []
+for i in len(mlp.total_cost):
+    if i % 100 == 0:
+        costs.append(mlp.total_cost[i])
+
+plt.plot(costs)
+plt.show()

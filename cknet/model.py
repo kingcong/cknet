@@ -1,10 +1,12 @@
 import numpy as np
+import math
 from cknet.regularization import L2Regularization
 from cknet.util import *
 
 class Model():
 
-    def __init__(self, layers, name="model", initializer=None, regularization=L2Regularization):
+    def __init__(self, layers, name="model", initializer=None, regularization=L2Regularization,
+                 batch_size = 64):
         super(Model, self).__init__()
         self.layers = layers
         self.name = name
@@ -38,23 +40,35 @@ class Model():
         lastlayer = self.layers[len(self.layers)-1]
         self.class_number = lastlayer.size
 
+        seed = 10
+
         for i in range(0, num_epochs):
-            self.weights = self.epoch_fit(X, Y, self.weights, i)
+
+            seed = seed + 1
+            self.weights = self.epoch_fit(X, Y, self.weights, i, seed=seed)
 
 
-    def epoch_fit(self, X, Y, weights, epoch):
-        AL, caches = self.fprop(X, Y, weights)
+    def epoch_fit(self, X, Y, weights, epoch, seed = 0):
 
-        cost = self.cost(AL, Y)
-        # Regularization
-        cost += self.regularization.cost_regularization(weights)
+        minibatches = self.random_mini_batches(X, Y, mini_batch_size=64, seed=seed)
+        for minibatch in minibatches:
+            (minibatch_X, minibatch_Y) = minibatch
 
-        grads = self.bprop(AL, Y, caches)
+            AL, caches = self.fprop(minibatch_X, minibatch_Y, weights)
 
-        # gradients checking
-        # self.gradient_check(weights, grads, X, Y)
+            cost = self.cost(AL, minibatch_Y)
 
-        weights = self.optimizer.optimizer(weights, grads, epoch)
+            # Regularization
+            cost += self.regularization.cost_regularization(weights)
+
+            grads = self.bprop(AL, minibatch_Y, caches)
+
+            # gradients checking
+            # self.gradient_check(weights, grads, X, Y)
+
+            weights = self.optimizer.optimizer(weights, grads, epoch)
+
+
         self.total_cost.append(cost)
 
         if epoch % 100 == 0:
@@ -98,6 +112,48 @@ class Model():
             grads["dW"+str(l+1)] = dW_temp
             grads["db"+str(l+1)] = db_temp
         return grads
+
+    def random_mini_batches(self, X, Y, mini_batch_size=64, seed=0):
+
+        """
+        Creates a list of random minibatches from (X, Y)
+
+        :param X: input data, of shape (input size, number of examples)
+        :param Y: true "label" vector (1 for blue dot / 0 for red dot), of shape (1, number of examples)
+        :param mini_batch_size: size of the mini-batches, integer
+        :param seed: random seed
+        :return: mini_batches -- list of synchronous (mini_batch_X, mini_batch_Y)
+
+        """
+
+        np.random.seed(seed)
+        m = X.shape[1]  # number of training examples
+        mini_batches = []
+
+        class_num = Y.shape[0]
+
+        # Step 1: Shuffle (X, Y)
+        permutation = list(np.random.permutation(m))
+        shuffled_X = X[:, permutation]
+        shuffled_Y = Y[:, permutation].reshape((class_num, m))
+
+        # Step 2: Partition (shuffled_X, shuffled_Y). Minus the end case.
+        num_complete_minibatches = math.floor(
+            m / mini_batch_size)  # number of mini batches of size mini_batch_size in your partitionning
+        for k in range(0, num_complete_minibatches):
+            mini_batch_X = shuffled_X[:, k * mini_batch_size: (k + 1) * mini_batch_size]
+            mini_batch_Y = shuffled_Y[:, k * mini_batch_size: (k + 1) * mini_batch_size]
+            mini_batch = (mini_batch_X, mini_batch_Y)
+            mini_batches.append(mini_batch)
+
+        # Handling the end case (last mini-batch < mini_batch_size)
+        if m % mini_batch_size != 0:
+            mini_batch_X = shuffled_X[:, num_complete_minibatches * mini_batch_size:]
+            mini_batch_Y = shuffled_Y[:, num_complete_minibatches * mini_batch_size:]
+            mini_batch = (mini_batch_X, mini_batch_Y)
+            mini_batches.append(mini_batch)
+
+        return mini_batches
 
     def gradient_check(self, parameters, gradients, X, Y, epsilon=1e-7):
 
